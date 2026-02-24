@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RENKAI SQUAD - Fixed Final</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Poppins:wght@900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        :root {
+            --neon: #00ffff;
+            --pink: #ff00ff;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: #000;
+            color: white;
+            font-family: 'Poppins', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 50px;
+            overflow-x: hidden;
+        }
+
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5rem;
+            letter-spacing: 10px;
+            margin-bottom: 60px;
+            text-shadow: 0 0 15px var(--neon);
+            text-align: center;
+        }
+
+        .landscape-container {
+            display: flex;
+            flex-direction: row; 
+            justify-content: center;
+            align-items: flex-end;
+            gap: 10px; 
+            width: 100%;
+            max-width: 1400px;
+            padding: 20px;
+            flex-wrap: nowrap;
+        }
+
+        .admin-box {
+            position: relative;
+            width: 85px; 
+            height: 350px;
+            display: flex;
+            justify-content: center;
+            transition: 0.3s;
+        }
+
+        .banner-shape {
+            position: absolute;
+            top: 0;
+            width: 75px; 
+            height: 180px;
+            background: #1a1a1a;
+            clip-path: polygon(0% 0%, 100% 0%, 100% 80%, 50% 100%, 0% 80%);
+            border: 2px solid var(--neon);
+            z-index: 1;
+            overflow: hidden;
+        }
+
+        .admin-box:nth-child(even) .banner-shape { border-color: var(--pink); }
+
+        .banner-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.6;
+            filter: grayscale(100%);
+        }
+
+        .char-front {
+            position: absolute;
+            bottom: 100px;
+            z-index: 3;
+            filter: drop-shadow(0 0 10px rgba(0,0,0,0.8));
+            transition: 0.3s;
+        }
+
+        /* Penyesuaian Ukuran Karakter */
+        .char-karumi {
+            width: auto;
+            max-height: 130px;
+            bottom: 100px;
+        }
+
+        /* Pastikan karakter depan pada admin-box pertama (Sann)
+           memakai ukuran & posisi yang sama dengan Karumi */
+        .admin-box:first-child .char-front {
+            width: auto;
+            max-height: 130px;
+            bottom: 100px;
+        }
+
+        .char-default {
+            width: 110px;
+        }
+
+        .name-vertical {
+            position: absolute;
+            right: -8px;
+            top: 35%;
+            display: flex;
+            flex-direction: column;
+            font-size: 1rem; 
+            font-weight: 900;
+            line-height: 1;
+            z-index: 4;
+            color: #fff;
+            text-shadow: 2px 2px 0px #000;
+            pointer-events: none;
+        }
+
+        .btn-join {
+            margin-top: 50px;
+            padding: 15px 60px;
+            background: transparent;
+            color: var(--neon);
+            border: 3px solid var(--neon);
+            font-family: 'Orbitron';
+            font-size: 1.2rem;
+            cursor: pointer;
+            text-decoration: none;
+            box-shadow: 0 0 15px var(--neon);
+            transition: 0.3s;
+            margin-bottom: 100px;
+        }
+
+        @media (min-width: 1000px) {
+            .landscape-container { gap: 30px; }
+            .admin-box { width: 280px; height: 550px; }
+            .banner-shape { width: 200px; height: 380px; }
+            .char-karumi { width: auto; max-height: 300px; bottom: 50px; }
+            .char-default { width: 260px; bottom: 50px; }
+            .admin-box:first-child .char-front { width: auto; max-height: 300px; bottom: 50px; }
+            .name-vertical { font-size: 2.5rem; right: 0; }
+        }
+
+        @media (max-width: 450px) {
+            .landscape-container {
+                overflow-x: auto;
+                justify-content: flex-start;
+                padding-left: 10px;
+            }
+            .admin-box { flex-shrink: 0; }
+        }
+
+        /* Welcome overlay styles */
+        .welcome-overlay {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0,0,0,0.96);
+            z-index: 9999;
+            pointer-events: auto;
+        }
+
+        .welcome-card {
+            border: 3px solid var(--neon);
+            padding: 36px 56px;
+            text-align: center;
+            box-shadow: 0 0 40px rgba(0,255,255,0.12), 0 0 10px var(--neon);
+            transform: translateY(8px) scale(0.96);
+            opacity: 0;
+            transition: transform 600ms cubic-bezier(.2,.9,.3,1), opacity 400ms ease-out;
+            backdrop-filter: blur(3px);
+            border-radius: 6px;
+        }
+
+        .welcome-card.show {
+            transform: translateY(0) scale(1);
+            opacity: 1;
+        }
+
+        .welcome-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.4rem;
+            letter-spacing: 8px;
+            color: var(--neon);
+            text-shadow: 0 0 18px var(--neon);
+            margin-bottom: 8px;
+            transform: translateY(6px);
+            opacity: 0;
+            transition: transform 420ms ease, opacity 420ms ease;
+        }
+
+        .welcome-title.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .welcome-sub {
+            color: #dffaff;
+            font-size: 0.95rem;
+            margin-top: 6px;
+            opacity: 0;
+            transition: opacity 420ms ease 220ms;
+        }
+
+        .welcome-sub.show { opacity: 1; }
+
+        .welcome-enter {
+            margin-top: 18px;
+            padding: 10px 22px;
+            border: 2px solid var(--neon);
+            color: var(--neon);
+            background: transparent;
+            cursor: pointer;
+            font-family: 'Orbitron';
+            letter-spacing: 1px;
+            transition: box-shadow 200ms ease, transform 120ms ease;
+        }
+
+        .welcome-overlay.hide { animation: overlayHide 420ms ease forwards; }
+        @keyframes overlayHide { to { opacity: 0; visibility: hidden; transform: scale(0.995); } }
+    </style>
+</head>
+<body>
+
+    <!-- Welcome overlay -->
+    <div id="welcomeOverlay" class="welcome-overlay" aria-hidden="false">
+        <div id="welcomeCard" class="welcome-card" role="dialog" aria-label="Welcome">
+            <div id="welcomeTitle" class="welcome-title">WELCOME TO</div>
+            <div id="welcomeTitleMain" class="welcome-title" style="font-size:3rem;">RENKAI SQUAD</div>
+            <div id="welcomeSub" class="welcome-sub">Enter the markas — klik untuk melanjutkan</div>
+            <button id="welcomeEnter" class="welcome-enter">ENTER</button>
+        </div>
+    </div>
+
+    <h1>RENKAI SQUAD</h1>
+
+    <div class="landscape-container">
+        
+        <div class="admin-box">
+            <div class="banner-shape">
+                <img src="Roxy Miguardia.jpg" class="banner-img">
+            </div>
+            <img src="Roxy.png" class="char-front char-karumi">
+            <div class="name-vertical">
+                <span>S</span><span>A</span><span>N</span><span>N</span>
+            </div>
+        </div>
+
+        <div class="admin-box">
+            <div class="banner-shape">
+                <img src="Osaragi.jpeg" class="banner-img">
+            </div>
+            <img src="Osaragi tampilan.png" class="char-front char-karumi">
+            <div class="name-vertical">
+                <span>R</span><span>E</span><span>Y</span><span>Y</span>
+            </div>
+        </div>
+
+        <div class="admin-box">
+            <div class="banner-shape">
+                <img src="Tokisaki Kurumi.jpeg" class="banner-img">
+            </div>
+            <img src="Kurumi.png" class="char-front char-karumi">
+            <div class="name-vertical">
+                <span>K</span><span>A</span><span>R</span><span>U</span><span>M</span><span>I</span>
+            </div>
+        </div>
+
+        <div class="admin-box">
+            <div class="banner-shape">
+                <img src="Reze.jpg" class="banner-img">
+            </div>
+                <img src="Reze Tampilan.png" class="char-front char-karumi">
+            <div class="name-vertical" style="right: 5px;">
+                <span>A</span><span>Z</span>
+            </div>
+        </div>
+
+    </div>
+
+    <a href="#" class="btn-join" onclick="joinWA()">JOIN WHATSAPP</a>
+
+    <script>
+        // Welcome overlay animation logic
+        document.addEventListener('DOMContentLoaded', function () {
+            const overlay = document.getElementById('welcomeOverlay');
+            const card = document.getElementById('welcomeCard');
+            const title = document.getElementById('welcomeTitle');
+            const titleMain = document.getElementById('welcomeTitleMain');
+            const sub = document.getElementById('welcomeSub');
+            const enter = document.getElementById('welcomeEnter');
+
+            // show sequence
+            requestAnimationFrame(() => {
+                card.classList.add('show');
+                setTimeout(() => title.classList.add('show'), 120);
+                setTimeout(() => titleMain.classList.add('show'), 280);
+                setTimeout(() => sub.classList.add('show'), 520);
+            });
+
+            function hideOverlay() {
+                overlay.classList.add('hide');
+                // remove from flow after animation
+                setTimeout(() => {
+                    overlay.style.display = 'none';
+                    overlay.setAttribute('aria-hidden', 'true');
+                }, 480);
+            }
+
+            // auto-hide after a short delay
+            const autoHide = setTimeout(hideOverlay, 3200);
+
+            // click or enter to skip immediately
+            enter.addEventListener('click', function () {
+                clearTimeout(autoHide);
+                hideOverlay();
+            });
+
+            // also allow clicking overlay background to skip
+            overlay.addEventListener('click', function (e) {
+                if (e.target === overlay) {
+                    clearTimeout(autoHide);
+                    hideOverlay();
+                }
+            });
+        });
+
+        function joinWA() {
+            Swal.fire({
+                title: 'DATABASE ACCESS',
+                text: 'Masuk ke markas Renkai Squad sekarang?',
+                background: '#000',
+                color: '#fff',
+                confirmButtonColor: '#00ffff'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = "https://chat.whatsapp.com/LINK_GRUP_LU";
+                }
+            })
+        }
+    </script>
+</body>
+</html>
